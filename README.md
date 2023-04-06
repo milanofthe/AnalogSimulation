@@ -1,3 +1,10 @@
+# GraphSimulation
+
+Small simulation framework for graphs with functional blocks. Initially intended as an emulator for simple analog computers. Connect functional blocks like Integrators, Adders and Comparators into a larger system and simulate in time domain.
+
+## Imports
+
+
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,23 +17,14 @@ from utils import (
 )
 ```
 
-# GraphSimulation
-
-Small simulation framework for graphs with functional blocks. Initially intended as an emulator for simple analog computers. Connect functional blocks like Integrators, Adders and Comparators into a larger system and simulate in time domain.
-
-
-```python
-
-```
-
-# Load Simulation from File
+## Load Simulation from File
 
 
 ```python
 sim = load_simulation_from_file("example.txt")
 ```
 
-# Iterations
+## Iterations
 
 
 ```python
@@ -53,6 +51,8 @@ for d in data:
 ax.grid(True)
 ax.set_xlabel("time [s]")
 ax.set_ylabel("states")
+
+plt.savefig("plot.png")
 ```
 
 
@@ -74,5 +74,7 @@ ax.set_ylabel("states")
 ```
 
     [NbConvertApp] Converting notebook README.ipynb to markdown
-    [NbConvertApp] Writing 2100 bytes to README.md
+    [NbConvertApp] Support files will be in README_files\
+    [NbConvertApp] Making directory README_files
+    [NbConvertApp] Writing 1373 bytes to README.md
     
