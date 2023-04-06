@@ -52,7 +52,7 @@ class Simulation:
 
         # Initialize the input connections for each block
         for connection in self.connections:
-            connection.connect(connection.target_input, connection.source)
+            connection.target.connect(connection.target_input, connection.source)
 
         # break algebraic loops by introducing small delay
         self.detect_and_break_loops()
@@ -78,7 +78,7 @@ class Simulation:
         add connection to existing simulation
         """
 
-        connection.connect(connection.target_input, connection.source)
+        connection.target.connect(connection.target_input, connection.source)
         self.connections.append(connection)
         self.detect_and_break_loops()
         self.blocks = self.sort_blocks()

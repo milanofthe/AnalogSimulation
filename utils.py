@@ -20,6 +20,10 @@ from blocks import (
     Delay
 )
 
+from simulator import (
+    Simulation, 
+    Connection
+)
 
 # FUNCS ====================================================================
 
