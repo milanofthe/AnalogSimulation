@@ -1,6 +1,16 @@
 # GraphSimulation
 
-Small simulation framework for graphs with functional blocks. Initially intended as an emulator for simple analog computers. Connect functional blocks like Integrators, Adders and Comparators into a larger system and simulate in time domain.
+This project is a small analog simulation framework that allows you to model and simulate various analog components and their connections. The simulator supports components such as amplifiers, integrators, comparators, adders, multipliers, constant sources, inverters, generators, delays, and displays.
+
+The simulator uses a fixed-point iteration method to compute the output values of the blocks, making it suitable for systems that include feedback loops and other complex interconnections.
+
+
+## Features
+- Support for various analog components.
+- Ability to add custom components by extending the Block class.
+- Load and save simulation configurations and states from/to files.
+- Easily modifiable and extensible codebase.
+- Fixed-point iteration for simulating feedback loops.
 
 ## Imports
 
@@ -17,7 +27,14 @@ from utils import (
 )
 ```
 
-## Load Simulation from File
+## Usage 
+To create a new simulation, you need to define the components (blocks) and their connections. First, instantiate the components, then create connections between them, and finally, create a Simulation object with the blocks and connections. 
+
+Alternatively the blocks, connections and initial states together with the timestep can be defined witin an external file.
+
+    SYNTAX
+        
+    
 
 
 ```python
@@ -25,6 +42,8 @@ sim = load_simulation_from_file("oscillator.txt")
 ```
 
 ## Iterations
+
+To run the simulation, call the .update() method on the Simulation object to compute the next timestep.
 
 
 ```python
@@ -56,6 +75,19 @@ ax.legend()
 plt.savefig("plot.png")
 ```
 
-![plot](https://user-images.githubusercontent.com/105657697/230390874-76e3b13f-d65f-4741-a545-502744988bbf.png)
+
+    
+![png](README_files/README_7_0.png)
+    
 
 
+
+```python
+!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
+```
+
+    [NbConvertApp] Converting notebook README.ipynb to markdown
+    [NbConvertApp] Support files will be in README_files\
+    [NbConvertApp] Making directory README_files
+    [NbConvertApp] Writing 1538 bytes to README.md
+    
