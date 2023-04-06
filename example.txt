@@ -1,3 +1,13 @@
+####################################################
+##
+##    SYNTAX:
+##        BLOCK <id> <type> <args>
+##        CONNECTION <to_id> <to_input> <from_id>
+##        STATE <id> <value>
+##        TIME <dt> <time>
+##
+####################################################
+
 BLOCK 0 Amplifier 2.0
 BLOCK 1 Integrator 0.0
 BLOCK 2 Comparator 0
