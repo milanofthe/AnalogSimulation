@@ -1,0 +1,35 @@
+###########################################################################
+##
+##    DAMPED, DRIVEN HARMONIC OSCILLATOR WITH NONLINEAR SPRING FORCE
+##
+##    SYNTAX:
+##        BLOCK <id> <type> <args>
+##        CONNECTION <to_id> <to_input> <from_id>
+##        STATE <id> <value> (optional)
+##        TIME <dt> <time>
+##
+###########################################################################
+
+BLOCK 0 Integrator 0.0       # Integrator 0 for position (x)
+BLOCK 1 Integrator 0.0       # Integrator 1 for velocity (v)
+BLOCK 2 Function -x**3       # Function block for nonlinear spring force (F_spring)
+BLOCK 3 Amplifier -0.2       # Amplifier with gain -c/m = -0.5/1 = -0.5 for damping force (F_damping)
+BLOCK 4 Adder                # Adder to combine spring, damping, and driving forces (F_total)
+BLOCK 5 Generator sin(x)+2   # Generator for sinusoidal driving force (F_driving)
+
+CONNECTION 0 input 1         # Connect velocity (v) to the input of Integrator 0 (position)
+CONNECTION 1 input 4         # Connect total force (F_total) to the input of Integrator 1 (velocity)
+CONNECTION 2 input 0         # Connect position (x) to the input of nonlinear spring force Function (F_spring)
+CONNECTION 3 input 1         # Connect velocity (v) to the input of damping force Amplifier (F_damping)
+CONNECTION 4 input_0 2       # Connect spring force (F_spring) to the input_0 of Adder (F_total)
+CONNECTION 4 input_1 3       # Connect damping force (F_damping) to the input_1 of Adder (F_total)
+CONNECTION 4 input_2 5       # Connect driving force (F_driving) to the input_2 of Adder (F_total)
+
+STATE 0 0.0                  # Initial position (x) = 0
+STATE 1 0.0                  # Initial velocity (v) = 0
+STATE 2 0.0                  # Initial spring force (F_spring) = 0
+STATE 3 0.0                  # Initial damping force (F_damping) = 0
+STATE 4 0.0                  # Initial total force (F_total) = 0
+STATE 5 0.0                  # Initial driving force (F_driving) = 0
+
+TIME 0.01 0                  # Set time step (dt) and initial time
