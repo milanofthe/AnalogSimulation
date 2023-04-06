@@ -3,17 +3,17 @@
 ##    SYNTAX:
 ##        BLOCK <id> <type> <args>
 ##        CONNECTION <to_id> <to_input> <from_id>
-##        STATE <id> <value>
+##        STATE <id> <value> (optional)
 ##        TIME <dt> <time>
 ##
 ####################################################
 
 BLOCK 0 Amplifier 2.0
 BLOCK 1 Integrator 0.0
-BLOCK 2 Comparator 0
+BLOCK 2 Comparator 0.5
 BLOCK 3 Adder
 BLOCK 4 Multiplier
-BLOCK 5 Constant 1
+BLOCK 5 Generator sin(x)
 CONNECTION 0 input 5
 CONNECTION 1 input 0
 CONNECTION 2 input 1
@@ -27,4 +27,4 @@ STATE 2 0
 STATE 3 0.0
 STATE 4 0.0
 STATE 5 1.0
-TIME 0.01 0
+TIME 0.001 0

@@ -17,13 +17,15 @@ from blocks import (
     Constant, 
     Inverter, 
     Generator, 
-    Delay
+    Delay,
+    Function
 )
 
 from simulator import (
     Simulation, 
     Connection
 )
+
 
 # FUNCS ====================================================================
 
@@ -54,7 +56,8 @@ def load_simulation_from_file(filename):
         "Constant"   : Constant,
         "Inverter"   : Inverter,
         "Generator"  : Generator,
-        "Delay"      : Delay
+        "Delay"      : Delay,
+        "Function"   : Function
     }
 
     for line in lines:
@@ -68,22 +71,23 @@ def load_simulation_from_file(filename):
         prefix = parts[0]
 
         if prefix == "BLOCK":
-            block_id, block_type = int(parts[1]), parts[2]
-            block_args = [eval(arg) for arg in parts[3:]]
+            _, block_id, block_type, *block_args = parts
             block = block_types[block_type](*block_args)
             blocks.append(block)
 
         elif prefix == "CONNECTION":
-            target_block_id, target_input_name, source_block_id = int(parts[1]), parts[2], int(parts[3])
-            connection = Connection(blocks[target_block_id], target_input_name, blocks[source_block_id])
+            _, target_block_id, target_input_name, source_block_id = parts
+            connection = Connection(blocks[int(target_block_id)], 
+                                    target_input_name, 
+                                    blocks[int(source_block_id)])
             connections.append(connection)
 
         elif prefix == "STATE":
-            block_id, state_value = int(parts[1]), eval(parts[2])
-            state_values[block_id] = state_value
+            _, block_id, state_value = parts
+            state_values[int(block_id)] = float(state_value)
 
         elif prefix == "TIME":
-            dt, time = eval(parts[1]), eval(parts[2])
+            _, dt, time = parts
 
         else:
             raise ValueError(f"Unknown line prefix: {prefix}")
@@ -94,7 +98,7 @@ def load_simulation_from_file(filename):
     for block_id, state_value in state_values.items():
         blocks[block_id].output = state_value
 
-    return Simulation(blocks, connections, dt, time)
+    return Simulation(blocks, connections, float(dt), float(time))
 
 
 def save_simulation_to_file(simulation, filename):
@@ -109,20 +113,9 @@ def save_simulation_to_file(simulation, filename):
     """
     
     with open(filename, 'w') as f:
-        for i, block in enumerate(simulation.blocks):
-            block_type = type(block).__name__
-            block_specific_params = []
-            if isinstance(block, Amplifier):
-                block_specific_params = [block.gain]
-            elif isinstance(block, Integrator):
-                block_specific_params = [block.output]
-            elif isinstance(block, Comparator):
-                block_specific_params = [block.threshold]
-            elif isinstance(block, Constant):
-                block_specific_params = [block.output]
 
-            block_specific_params_str = ' '.join(repr(p) for p in block_specific_params)
-            f.write(f"BLOCK {i} {block_type} {block_specific_params_str}\n")
+        for i, block in enumerate(simulation.blocks):
+            f.write(f"BLOCK {i} {repr(block)}\n")
 
         for connection in simulation.connections:
             target_block_id = simulation.blocks.index(connection.target)

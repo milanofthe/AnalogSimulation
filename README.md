@@ -31,7 +31,7 @@ sim = load_simulation_from_file("example.txt")
 data = [[] for _ in range(len(sim.blocks))]
 time = []
 
-for _ in range(100):
+for _ in range(5000):
     
     sim.update()
     
@@ -56,10 +56,18 @@ plt.savefig("plot.png")
 ```
 
 
-
-
-![plot](https://user-images.githubusercontent.com/105657697/230327869-1fc2d295-2591-4111-a1d1-9370c1d8a4ed.png)
+    
+![png](README_files/README_7_0.png)
     
 
-    
 
+
+```python
+!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
+```
+
+    [NbConvertApp] Converting notebook README.ipynb to markdown
+    [NbConvertApp] Support files will be in README_files\
+    [NbConvertApp] Making directory README_files
+    [NbConvertApp] Writing 1503 bytes to README.md
+    
