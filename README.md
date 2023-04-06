@@ -46,25 +46,17 @@ sim = load_simulation_from_file("oscillator.txt")
 
 ## Iterations
 
-To run the simulation, call the .update() method on the Simulation object to compute the next timestep.
+To run the simulation for a specific duration, call the run() method on the Simulation object with the desired duration.
 
 
 ```python
-data = [[] for _ in range(len(sim.blocks))]
-time = []
-
-for _ in range(4000):
-    
-    sim.update()
-    
-    time.append(sim.time)
-    for i, val in enumerate(sim.get_state().values()):
-        data[i].append(val)
-
+time, data = sim.run(max_time=30)
 ```
 
 
 ```python
+#plot the results
+
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,5), dpi=120)
 
 for d, block in zip(data, sim.blocks):
@@ -79,6 +71,18 @@ plt.savefig("plot.png")
 ```
 
 
-![plot](https://user-images.githubusercontent.com/105657697/230395932-921c7a67-10a0-4668-beb6-f212bbf9f0ed.png)
+    
+![png](README_files/README_7_0.png)
+    
 
+
+
+```python
+!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
+```
+
+    [NbConvertApp] Converting notebook README.ipynb to markdown
+    [NbConvertApp] Support files will be in README_files\
+    [NbConvertApp] Making directory README_files
+    [NbConvertApp] Writing 2673 bytes to README.md
     

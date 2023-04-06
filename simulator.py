@@ -8,10 +8,7 @@
 
 # IMPORTS ===================================================================
 
-from blocks import (
-    Integrator, 
-    Delay
-)
+from blocks import Integrator
 
 
 # CLASSES ====================================================================
@@ -30,6 +27,11 @@ class Connection:
 
 
 class Simulation:
+
+    """
+    main simulation class that handles all the blocks 
+    and connections and the timestep update
+    """
 
     def __init__(self, blocks, connections, dt, time=0):
         self.blocks = blocks
@@ -125,7 +127,7 @@ class Simulation:
 
         self.time += self.dt
 
-        steady_state   = False
+        steady_state = False
 
         for _ in range(max_iterations):
 
@@ -147,6 +149,39 @@ class Simulation:
 
         if not steady_state:
             print("Warning: Steady state not reached within the maximum number of iterations")
+
+
+    def run(self, max_time=10, reset=True):
+
+        """
+        performs multiple simulation steps and returns 
+        the time series results over the time steps
+
+        INPUTS:
+            total_time : (float) simulation time [s]
+            reset      : (bool) reset the simulation time
+        """
+
+        #reset time
+        if reset:
+            self.time = 0
+
+        #initialize the time series data
+        data = [[] for _ in range(len(self.blocks))]
+        time = []
+
+        #iterate until max_time reached
+        while self.time < max_time:
+
+            #perform one iteration
+            self.update()
+            
+            #save the current state
+            time.append(self.time)
+            for i, val in enumerate(self.get_state().values()):
+                data[i].append(val)
+
+        return time, data
 
 
     def get_state(self):

@@ -17,7 +17,6 @@ from blocks import (
     Constant, 
     Inverter, 
     Generator, 
-    Delay,
     Function
 )
 
@@ -56,7 +55,6 @@ def load_simulation_from_file(filename):
         "Constant"   : Constant,
         "Inverter"   : Inverter,
         "Generator"  : Generator,
-        "Delay"      : Delay,
         "Function"   : Function
     }
 
