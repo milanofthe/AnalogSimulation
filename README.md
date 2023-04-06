@@ -58,13 +58,9 @@ plt.savefig("plot.png")
 
 
 
-    Text(0, 0.5, 'states')
-
-
-
-
+![plot](https://user-images.githubusercontent.com/105657697/230327869-1fc2d295-2591-4111-a1d1-9370c1d8a4ed.png)
     
-![png](README_files/README_7_1.png)
+
     
 
 
