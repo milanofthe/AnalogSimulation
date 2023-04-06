@@ -23,8 +23,8 @@ CONNECTION 3 input 1     # Connect velocity (v) to the input of damping force Am
 CONNECTION 4 input_0 2   # Connect spring force (F_spring) to the input_0 of Adder (F_total)
 CONNECTION 4 input_1 3   # Connect damping force (F_damping) to the input_1 of Adder (F_total)
 
-STATE 0 1.0              # Initial position (x) = 0
-STATE 1 2.0              # Initial velocity (v) = 1
+STATE 0 1.0              # Initial position (x) = 1
+STATE 1 2.0              # Initial velocity (v) = 2
 STATE 2 0.0              # Initial spring force (F_spring) = 0
 STATE 3 0.0              # Initial damping force (F_damping) = 0
 STATE 4 0.0              # Initial total force (F_total) = 0
