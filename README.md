@@ -33,7 +33,10 @@ To create a new simulation, you need to define the components (blocks) and their
 Alternatively the blocks, connections and initial states together with the timestep can be defined witin an external file.
 
     SYNTAX
-        
+    BLOCK <id> <type> <args>
+    CONNECTION <to_id> <to_input> <from_id>
+    STATE <id> <value> (optional)
+    TIME <dt> <time>
     
 
 
@@ -89,5 +92,5 @@ plt.savefig("plot.png")
     [NbConvertApp] Converting notebook README.ipynb to markdown
     [NbConvertApp] Support files will be in README_files\
     [NbConvertApp] Making directory README_files
-    [NbConvertApp] Writing 1538 bytes to README.md
+    [NbConvertApp] Writing 2554 bytes to README.md
     
