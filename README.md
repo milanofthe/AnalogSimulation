@@ -1,4 +1,4 @@
-# GraphSimulation
+# AnalogSimulation
 
 This project is a small analog simulation framework that allows you to model and simulate various analog components and their connections. The simulator supports components such as amplifiers, integrators, comparators, adders, multipliers, constant sources, inverters and arbitrary signal generators.
 
