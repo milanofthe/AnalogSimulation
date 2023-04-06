@@ -17,7 +17,8 @@ from blocks import (
     Constant, 
     Inverter, 
     Generator, 
-    Function
+    Function,
+    Scope
 )
 
 from simulator import (
@@ -55,7 +56,8 @@ def load_simulation_from_file(filename):
         "Constant"   : Constant,
         "Inverter"   : Inverter,
         "Generator"  : Generator,
-        "Function"   : Function
+        "Function"   : Function,
+        "Scope"      : Scope
     }
 
     for line in lines:

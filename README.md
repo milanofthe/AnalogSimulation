@@ -16,23 +16,18 @@ The simulator uses a fixed-point iteration method to compute the output values o
 
 
 ```python
-import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use('dark_background')
 cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-from utils import (
-    load_simulation_from_file,
-    save_simulation_to_file
-)
+from utils import load_simulation_from_file
 ```
 
 ## Usage 
 To create a new simulation, you need to define the components (blocks) and their connections. First, instantiate the components, then create connections between them, and finally, create a Simulation object with the blocks and connections. 
 
-Alternatively the blocks, connections and initial states together with the timestep can be defined witin an external file.
+Alternatively the blocks, connections and initial states together with the timestep can be defined witin an external file with the following syntax:
 
-    SYNTAX
     BLOCK <id> <type> <args>
     CONNECTION <to_id> <to_input> <from_id>
     STATE <id> <value> (optional)
@@ -41,7 +36,10 @@ Alternatively the blocks, connections and initial states together with the times
 
 
 ```python
-sim = load_simulation_from_file("oscillator.txt")
+#sim = load_simulation_from_file("oscillator.txt")
+#sim = load_simulation_from_file("driven_nonlinear_oscillator.txt")
+#sim = load_simulation_from_file("two_mass_oscillator.txt")
+sim = load_simulation_from_file("nonlinear_pendulum.txt")
 ```
 
 ## Simulation
@@ -50,27 +48,44 @@ To run the simulation for a specific duration, call the run() method on the Simu
 
 
 ```python
-time, data = sim.run(max_time=30)
+time, data = sim.run(duration=60, debug=False)
 ```
 
 
 ```python
 #plot the results
-
-fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,5), dpi=120)
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,5), dpi=120, tight_layout=True)
 
 for d, block in zip(data, sim.blocks):
-    ax.plot(time, d, label=type(block).__name__)
+    if type(block).__name__ == "Scope":
+        ax.plot(time, d, label=block.label)
     
 ax.grid(True)
 ax.set_xlabel("time [s]")
 ax.set_ylabel("states")
-ax.legend()
+ax.legend(loc="lower right", ncol=2)
 
 plt.savefig("plot.png")
 ```
 
 
-![plot](https://user-images.githubusercontent.com/105657697/230402392-0fc4787c-6071-40cf-a3d1-c6cbcef52476.png)
+    
+![png](README_files/README_7_0.png)
+    
 
 
+
+```python
+!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
+```
+
+    [NbConvertApp] Converting notebook README.ipynb to markdown
+    [NbConvertApp] Support files will be in README_files\
+    [NbConvertApp] Making directory README_files
+    [NbConvertApp] Writing 1111293 bytes to README.md
+    
+
+
+```python
+
+```

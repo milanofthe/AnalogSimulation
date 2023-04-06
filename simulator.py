@@ -21,9 +21,10 @@ class Connection:
     """
 
     def __init__(self, target, target_input, source):
-        self.target = target
+
+        self.target       = target
         self.target_input = target_input
-        self.source = source
+        self.source       = source
 
 
 class Simulation:
@@ -34,10 +35,11 @@ class Simulation:
     """
 
     def __init__(self, blocks, connections, dt, time=0):
-        self.blocks = blocks
+
+        self.blocks      = blocks
         self.connections = connections
-        self.dt = dt
-        self.time = time
+        self.dt          = dt
+        self.time        = time
 
         self.initialize_simulation()
 
@@ -46,7 +48,7 @@ class Simulation:
 
         """
         Initialize the connections between the blocks and do 
-        some preprocessing to improve the convergence od the simulation.
+        some preprocessing to improve the convergence of the simulation.
         """
 
         # Initialize the input connections for each block
@@ -54,7 +56,7 @@ class Simulation:
             connection.target.connect(connection.target_input, connection.source)
 
         # sort the blocks based on their dependencies
-        self.blocks = self.sort_blocks()
+        self.blocks = self._sort_blocks()
 
 
     def add_block(self, block):
@@ -64,7 +66,7 @@ class Simulation:
         """
 
         self.blocks.append(block)
-        self.blocks = self.sort_blocks()
+        self.blocks = self._sort_blocks()
         
 
     def add_connection(self, connection):
@@ -75,10 +77,10 @@ class Simulation:
 
         connection.target.connect(connection.target_input, connection.source)
         self.connections.append(connection)
-        self.blocks = self.sort_blocks()
+        self.blocks = self._sort_blocks()
         
 
-    def sort_blocks(self):
+    def _sort_blocks(self):
 
         """
         sort the blocks chronologically by their connections 
@@ -114,7 +116,7 @@ class Simulation:
         return sorted_blocks
 
 
-    def update(self, max_iterations=100, tolerance=1e-6):
+    def update(self, max_iterations=20, tolerance=1e-6, debug=False):
 
         """
         perform one update of the simulation (time increment by dt)
@@ -123,22 +125,32 @@ class Simulation:
         INPUTS:
             max_iterations : (int) maximum numbver of fixed-point iterations
             tolerance      : (float) tolerance for convergence of fixed-point iterations
+            debug          : (bool) print debugging info (convergence etc.)
         """
 
         self.time += self.dt
 
+        if debug:
+            print("\ndebug status:")
+            print("    time :", self.time)
+
         steady_state = False
 
-        for _ in range(max_iterations):
+        for it in range(max_iterations):
 
-            prev_outputs = self.get_state()
+            prev_state = self.get_state()
 
             for block in self.blocks:
                 block.compute(self.time, self.dt)
 
-            max_difference = max(abs(block.output - prev_outputs[block]) for block in self.blocks)
+            max_rel_diff = max(abs((blk.output - prev_state[blk])/blk.output) 
+                                for blk in self.blocks if blk.output != 0.0)
 
-            if max_difference < tolerance:
+            if debug:
+                print("        iteration  :", it+1)
+                print("        difference :", max_rel_diff)
+
+            if max_rel_diff < tolerance:
                 steady_state = True
                 break
 
@@ -148,18 +160,21 @@ class Simulation:
                 block.update_output()
 
         if not steady_state:
-            print("Warning: Steady state not reached within the maximum number of iterations")
+            print("Warning: Steady state not reached")
 
 
-    def run(self, max_time=10, reset=True):
+    def run(self, duration=10, reset=False, max_iterations=100, tolerance=1e-6, debug=False):
 
         """
         performs multiple simulation steps and returns 
         the time series results over the time steps
 
         INPUTS:
-            total_time : (float) simulation time [s]
-            reset      : (bool) reset the simulation time
+            total_time     : (float) simulation time [s]
+            reset          : (bool) reset the simulation time
+            max_iterations : (int) maximum numbver of fixed-point iterations
+            tolerance      : (float) tolerance for convergence of fixed-point iterations
+            debug          : (bool) print debugging info (convergence etc.)
         """
 
         #reset time
@@ -170,11 +185,11 @@ class Simulation:
         data = [[] for _ in range(len(self.blocks))]
         time = []
 
-        #iterate until max_time reached
-        while self.time < max_time:
+        #iterate until duration is reached
+        while self.time < duration:
 
             #perform one iteration
-            self.update()
+            self.update(max_iterations, tolerance, debug)
             
             #save the current state
             time.append(self.time)
@@ -185,10 +200,18 @@ class Simulation:
 
 
     def get_state(self):
-
         """
         returns the current state of the simulation 
         (output values of all blocks)
         """
-
         return {block: block.output for block in self.blocks}
+
+
+    def set_state(self, state):
+        """
+        set the state of the simulation 
+        (output values of all blocks)
+        """
+        for block, val in zip(self.blocks, state.values()):
+            block.output = val
+

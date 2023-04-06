@@ -57,23 +57,32 @@ class Amplifier(Block):
 class Integrator(Block):
 
     """
-    integrates the input signal
+    integrates the input signal using the 
+    trapezoidal integration rule, except for the 
+    first step, that uses the forward euler rule
     """
 
     def __init__(self, initial_value=0.0):
         super().__init__()
-        self.output = float(initial_value)
+        self.output      = float(initial_value)
         self.temp_output = float(initial_value)
+        self.prev_input  = None
 
     def __str__(self):
         return f"Integrator {self.output}"
 
     def compute(self, t, dt):
         input_signal = self.inputs['input'].output
-        self.temp_output = self.output + input_signal * dt
+        if self.prev_input is None:
+            self.temp_output = self.output + input_signal * dt
+        else:
+            self.temp_output = self.output + (input_signal + self.prev_input) * dt / 2
 
     def update_output(self):
+        self.prev_input = self.inputs['input'].output
         self.output = self.temp_output
+
+
 
 
 class Comparator(Block):
@@ -195,3 +204,22 @@ class Function(Block):
     def compute(self, t, dt):
         input_signal = self.inputs['input'].output
         self.output = self.func(input_signal)
+
+
+class Scope(Block):
+    
+    """
+    block for visualization, input pass through
+    """
+
+    def __init__(self, label=""):
+        super().__init__()
+        self.label = label
+
+    def __str__(self):
+        return f"Scope {self.label}"
+    
+    def compute(self, t, dt):
+        self.output = self.inputs['input'].output
+
+

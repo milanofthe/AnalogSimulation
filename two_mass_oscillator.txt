@@ -1,0 +1,63 @@
+###########################################################################
+##
+##    TWO-MASS-SPRING-DAMPER SYSTEM
+##
+##    SYNTAX:
+##        BLOCK <id> <type> <args>
+##        CONNECTION <to_id> <to_input> <from_id>
+##        STATE <id> <value> (optional)
+##        TIME <dt> <time>
+##
+###########################################################################
+
+BLOCK 0 Integrator 0.0         # Integrator 0 for position x1 (mass 1)
+BLOCK 1 Integrator 0.0         # Integrator 1 for position x2 (mass 2)
+BLOCK 2 Integrator 0.0         # Integrator 2 for velocity v1 (mass 1)
+BLOCK 3 Integrator 0.0         # Integrator 3 for velocity v2 (mass 2)
+BLOCK 4 Amplifier -1.0         # Amplifier with gain -k1/m1 for spring force F1 (mass 1)
+BLOCK 5 Amplifier -2.0         # Amplifier with gain -k2/m2 for spring force F2 (mass 2)
+BLOCK 6 Amplifier -0.3         # Amplifier with gain -c1/m1 for damping force D1 (mass 1)
+BLOCK 7 Amplifier -0.4         # Amplifier with gain -c2/m2 for damping force D2 (mass 2)
+BLOCK 8 Adder                  # Adder to combine F1, D1, and F_interaction (F_total1)
+BLOCK 9 Adder                  # Adder to combine F2, D2, and -F_interaction (F_total2)
+BLOCK 10 Multiplier            # Multiplier for spring force interaction (F_interaction)
+BLOCK 11 Scope position_1      # Scope for display of position
+BLOCK 12 Scope velocity_1      # Scope for display of velocity
+BLOCK 13 Scope position_2      # Scope for display of position
+BLOCK 14 Scope velocity_2      # Scope for display of velocity
+
+CONNECTION 0 input 2           # Connect velocity v1 to the input of Integrator 0 (position x1)
+CONNECTION 1 input 3           # Connect velocity v2 to the input of Integrator 1 (position x2)
+CONNECTION 2 input 8           # Connect total force F_total1 to the input of Integrator 2 (velocity v1)
+CONNECTION 3 input 9           # Connect total force F_total2 to the input of Integrator 3 (velocity v2)
+CONNECTION 4 input 0           # Connect position x1 to the input of spring force Amplifier F1
+CONNECTION 5 input 1           # Connect position x2 to the input of spring force Amplifier F2
+CONNECTION 6 input 2           # Connect velocity v1 to the input of damping force Amplifier D1
+CONNECTION 7 input 3           # Connect velocity v2 to the input of damping force Amplifier D2
+CONNECTION 8 input_0 4         # Connect spring force F1 to the input_0 of Adder F_total1
+CONNECTION 8 input_1 6         # Connect damping force D1 to the input_1 of Adder F_total1
+CONNECTION 8 input_2 10        # Connect spring force interaction F_interaction to the input_2 of Adder F_total1
+CONNECTION 9 input_0 5         # Connect spring force F2 to the input_0 of Adder F_total2
+CONNECTION 9 input_1 7         # Connect damping force D2 to the input_1 of Adder F_total2
+CONNECTION 9 input_2 10        # Connect -spring force interaction -F_interaction to the input_2 of Adder F_total2 (negate in Multiplier)
+CONNECTION 10 input_0 0        # Connect position x1 to the input_0 of Multiplier (F_interaction)
+CONNECTION 10 input_1 1        # Connect position x2 to the input_1 of Multiplier (F_interaction, with gain -1 for negation)
+CONNECTION 11 input 0          # Connect position x1 to the output of Integrator 0 
+CONNECTION 12 input 2          # Connect velocity v1 to the output of Integrator 2 
+CONNECTION 13 input 1          # Connect position x2 to the output of Integrator 1 
+CONNECTION 14 input 3          # Connect velocity v2 to the output of Integrator 3 
+
+STATE 0 1.0                    # Initial position x1 = 1
+STATE 1 -1.0                   # Initial position x2 = 0
+STATE 2 0.0                    # Initial velocity v1 = 0
+STATE 3 0.0                    # Initial velocity v2 = 0
+STATE 4 0.0                    # Initial spring force F1 = 0
+STATE 5 0.0                    # Initial spring force F2 = 0
+STATE 6 0.0                    # Initial damping force D1 = 0
+STATE 7 0.0                    # Initial damping force D2 = 0
+STATE 8 0.0                    # Initial total force F_total1 = 0
+STATE 9 0.0                    # Initial total force F_total2 = 0
+STATE 10 0.0                   # Initial spring force interaction F_interaction = 0
+
+TIME 0.01 0                    # Set time step (dt) and initial time
+
