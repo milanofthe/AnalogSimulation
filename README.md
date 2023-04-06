@@ -63,14 +63,3 @@ plt.savefig("plot.png")
 
     
 
-
-
-```python
-!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
-```
-
-    [NbConvertApp] Converting notebook README.ipynb to markdown
-    [NbConvertApp] Support files will be in README_files\
-    [NbConvertApp] Making directory README_files
-    [NbConvertApp] Writing 1373 bytes to README.md
-    
