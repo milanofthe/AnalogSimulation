@@ -26,7 +26,7 @@ class Amplifier(Block):
 
     def __init__(self, gain=1.0):
         super().__init__()
-        self.gain = eval(gain)
+        self.gain = float(gain)
 
     def __str__(self):
         return f"Amplifier {self.gain}"
@@ -40,8 +40,8 @@ class Integrator(Block):
 
     def __init__(self, initial_value=0.0):
         super().__init__()
-        self.output = eval(initial_value)
-        self.temp_output = initial_value
+        self.output = float(initial_value)
+        self.temp_output = float(initial_value)
 
     def __str__(self):
         return f"Integrator {self.output}"
@@ -57,7 +57,7 @@ class Comparator(Block):
 
     def __init__(self, threshold=0.0):
         super().__init__()
-        self.threshold = eval(threshold)
+        self.threshold = float(threshold)
 
     def __str__(self):
         return f"Comparator {self.threshold}"
@@ -90,7 +90,7 @@ class Constant(Block):
 
     def __init__(self, value):
         super().__init__()
-        self.output = value
+        self.output = float(value)
 
     def __str__(self):
         return f"Constant {self.output}"
@@ -101,7 +101,7 @@ class Constant(Block):
 class Inverter(Block):
 
     def __str__(self):
-        return f"Inverter"
+        return "Inverter"
 
     def compute(self, t, dt):
         self.output = -1 * self.inputs['input'].output
@@ -138,8 +138,8 @@ class Delay(Block):
     
     def __init__(self, initial_value=0.0):
         super().__init__()
-        self.output = eval(initial_value)
-        self.prev_output = eval(initial_value)
+        self.output = float(initial_value)
+        self.prev_output = float(initial_value)
         self.time = 0
 
     def __str__(self):

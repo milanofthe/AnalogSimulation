@@ -63,9 +63,12 @@ def load_simulation_from_file(filename):
     for line in lines:
         line = line.strip()
 
-        # Skip empty lines and comments
+        #skip empty lines and comments
         if not line or line.startswith('#'):
             continue
+
+        #remove inline comment
+        line, *_ = line.split("#")
 
         parts = line.split()
         prefix = parts[0]

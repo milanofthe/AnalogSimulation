@@ -21,7 +21,7 @@ from utils import (
 
 
 ```python
-sim = load_simulation_from_file("example.txt")
+sim = load_simulation_from_file("oscillator.txt")
 ```
 
 ## Iterations
@@ -31,7 +31,7 @@ sim = load_simulation_from_file("example.txt")
 data = [[] for _ in range(len(sim.blocks))]
 time = []
 
-for _ in range(5000):
+for _ in range(4000):
     
     sim.update()
     
@@ -45,21 +45,30 @@ for _ in range(5000):
 ```python
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,5), dpi=120)
 
-for d in data:
-    ax.plot(time, d)
+for d, block in zip(data, sim.blocks):
+    ax.plot(time, d, label=type(block).__name__)
     
 ax.grid(True)
 ax.set_xlabel("time [s]")
 ax.set_ylabel("states")
+ax.legend()
 
 plt.savefig("plot.png")
 ```
 
 
     
-![plot](https://user-images.githubusercontent.com/105657697/230347003-3201dcc6-b1a1-416c-be70-7e57abd004bf.png)
+![png](README_files/README_7_0.png)
+    
 
 
 
+```python
+!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
+```
 
+    [NbConvertApp] Converting notebook README.ipynb to markdown
+    [NbConvertApp] Support files will be in README_files\
+    [NbConvertApp] Making directory README_files
+    [NbConvertApp] Writing 1471 bytes to README.md
     

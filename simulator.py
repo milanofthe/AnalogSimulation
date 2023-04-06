@@ -28,9 +28,6 @@ class Connection:
         self.target_input = target_input
         self.source = source
 
-    def connect(self):
-        self.target.connect(self.target_input, self.source)
-
 
 class Simulation:
 
@@ -54,9 +51,6 @@ class Simulation:
         for connection in self.connections:
             connection.target.connect(connection.target_input, connection.source)
 
-        # break algebraic loops by introducing small delay
-        self.detect_and_break_loops()
-
         # sort the blocks based on their dependencies
         self.blocks = self.sort_blocks()
 
@@ -68,7 +62,6 @@ class Simulation:
         """
 
         self.blocks.append(block)
-        self.detect_and_break_loops()
         self.blocks = self.sort_blocks()
         
 
@@ -80,7 +73,6 @@ class Simulation:
 
         connection.target.connect(connection.target_input, connection.source)
         self.connections.append(connection)
-        self.detect_and_break_loops()
         self.blocks = self.sort_blocks()
         
 
@@ -120,54 +112,7 @@ class Simulation:
         return sorted_blocks
 
 
-    def detect_and_break_loops(self):
-
-        """
-        Performs a depth-first search on each block to detect loops. 
-        If a loop is detected and the connected block isn't a Delay block, 
-        a new Delay block is created, connected to the block, 
-        and added to the list of blocks in the simulation. 
-        This breaks the loop by introducing a small delay in the signal path.
-        """
-
-        visited = set()
-
-        def visit(block, path, prev_input_name=None):
-
-            if block in visited:
-                return False
-
-            if block in path:
-                return True
-
-            path.add(block)
-            
-            loop_detected = False
-
-            for input_name, connected_block in block.inputs.items():
-
-                if visit(connected_block, path, input_name):
-                    loop_detected = True
-                    
-                    if not isinstance(connected_block, Delay):
-                        delay_block = Delay()
-                        delay_block.connect('input', connected_block)
-                        self.blocks.append(delay_block)
-                        block.connect(input_name, delay_block) 
-            
-            path.remove(block)
-
-            visited.add(block)
-            
-            return loop_detected
-
-        for block in self.blocks:
-
-            if block not in visited:
-                visit(block, set())
-
-
-    def update(self, max_iterations=100, tolerance=1e-5):
+    def update(self, max_iterations=100, tolerance=1e-6):
 
         """
         perform one update of the simulation (time increment by dt)
@@ -182,7 +127,7 @@ class Simulation:
 
         steady_state   = False
 
-        for it in range(max_iterations):
+        for _ in range(max_iterations):
 
             prev_outputs = self.get_state()
 
@@ -195,7 +140,7 @@ class Simulation:
                 steady_state = True
                 break
 
-        # Update the output of the Integrators
+        #update the outputs of the Integrators
         for block in self.blocks:
             if isinstance(block, Integrator):
                 block.update_output()
