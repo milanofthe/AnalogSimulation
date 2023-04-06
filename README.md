@@ -44,7 +44,7 @@ Alternatively the blocks, connections and initial states together with the times
 sim = load_simulation_from_file("oscillator.txt")
 ```
 
-## Iterations
+## Simulation
 
 To run the simulation for a specific duration, call the run() method on the Simulation object with the desired duration.
 
@@ -71,18 +71,6 @@ plt.savefig("plot.png")
 ```
 
 
-    
-![png](README_files/README_7_0.png)
-    
+![plot](https://user-images.githubusercontent.com/105657697/230402392-0fc4787c-6071-40cf-a3d1-c6cbcef52476.png)
 
 
-
-```python
-!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
-```
-
-    [NbConvertApp] Converting notebook README.ipynb to markdown
-    [NbConvertApp] Support files will be in README_files\
-    [NbConvertApp] Making directory README_files
-    [NbConvertApp] Writing 2673 bytes to README.md
-    
