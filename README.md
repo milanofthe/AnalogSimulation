@@ -78,23 +78,5 @@ plt.savefig("plot.png")
 ```
 
 
-    
-![png](README_files/README_8_0.png)
-    
+![plot](https://user-images.githubusercontent.com/105657697/230586883-58dc1257-55b5-4ec1-9075-7082a5b6d23f.png)
 
-
-
-```python
-!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
-```
-
-    [NbConvertApp] Converting notebook README.ipynb to markdown
-    [NbConvertApp] Support files will be in README_files\
-    [NbConvertApp] Making directory README_files
-    [NbConvertApp] Writing 2886 bytes to README.md
-    
-
-
-```python
-
-```
