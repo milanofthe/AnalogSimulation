@@ -23,6 +23,7 @@ class Block:
     def __init__(self):
         self.inputs = {}
         self.output = 0
+        self.label = type(self).__name__.lower()
 
     def connect(self, input_name, other_block):
         self.inputs[input_name] = other_block
@@ -64,9 +65,9 @@ class Integrator(Block):
 
     def __init__(self, initial_value=0.0):
         super().__init__()
-        self.output      = float(initial_value)
+        self.output = float(initial_value)
         self.temp_output = float(initial_value)
-        self.prev_input  = None
+        self.prev_input = None
 
     def __str__(self):
         return f"Integrator {self.output}"
@@ -82,6 +83,28 @@ class Integrator(Block):
         self.prev_input = self.inputs['input'].output
         self.output = self.temp_output
 
+class Differentiator(Block):
+
+    """
+    differentiates the input signal
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.prev_input = None
+        self.temp_output = 0
+
+    def __str__(self):
+        return "Differentiator"
+
+    def compute(self, t, dt):
+        input_signal = self.inputs['input'].output
+        if self.prev_input is not None:
+            self.temp_output = (input_signal - self.prev_input) / dt
+
+    def update_output(self):
+        self.prev_input = self.inputs['input'].output
+        self.output = self.temp_output
 
 
 
@@ -174,13 +197,13 @@ class Generator(Block):
     by the string in the argument
     """
 
-    def __init__(self, fx="sin(x)"):
+    def __init__(self, expression="sin(x)"):
         super().__init__()
-        self.fx = fx
-        self.func = lambda x: eval(fx)
+        self.expression = expression
+        self.func = lambda x: eval(expression)
 
     def __str__(self):
-        return f"Generator {self.fx}"
+        return f"Generator {self.expression}"
 
     def compute(self, t, dt):
         self.output = self.func(t)
@@ -193,17 +216,34 @@ class Function(Block):
     by the string as the argument
     """
 
-    def __init__(self, fx="x+1"):
+    def __init__(self, expression="x+1"):
         super().__init__()
-        self.fx = fx
-        self.func = lambda x : eval(fx)
+        self.expression = expression
+        self.func = lambda x : eval(expression)
 
     def __str__(self):
-        return f"Function {self.fx}"
+        return f"Function {self.expression}"
 
     def compute(self, t, dt):
         input_signal = self.inputs['input'].output
         self.output = self.func(input_signal)
+
+
+class Switch(Block):
+
+    """
+    switching block with an input signal 
+    and a control signals as inputs, pass
+    through if control signal positive
+    """
+    
+    def __str__(self):
+        return f"Switch"
+
+    def compute(self, t, dt):
+        input_signal   = self.inputs['input'].output
+        control_signal = self.inputs['control'].output
+        self.output = input_signal if control_signal > 0 else 0
 
 
 class Scope(Block):
@@ -221,5 +261,3 @@ class Scope(Block):
     
     def compute(self, t, dt):
         self.output = self.inputs['input'].output
-
-

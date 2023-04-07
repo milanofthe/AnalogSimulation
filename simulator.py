@@ -7,11 +7,20 @@
 #############################################################################
 
 # IMPORTS ===================================================================
+from utils import timer
+from blocks import Integrator, Differentiator, Scope
 
-from blocks import Integrator
+
+# LOGGING ===================================================================
+
+import logging
+
+logging.basicConfig(level=logging.INFO, 
+                    format=r"%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger(__name__)
 
 
-# CLASSES ====================================================================
+# CLASSES ===================================================================
 
 class Connection:
 
@@ -36,45 +45,54 @@ class Simulation:
 
     def __init__(self, blocks, connections, dt, time=0):
 
+        """
+        initialize the simulation
+
+        INPUTS:
+            blocks      : (list) list of Block objects
+            connections : (list) list of Connection objects
+            dt          : (float) timestep
+            time        : (float) sinulation time
+        """
+
         self.blocks      = blocks
         self.connections = connections
         self.dt          = dt
         self.time        = time
 
-        self.initialize_simulation()
+        self._initialize_simulation()
 
 
-    def initialize_simulation(self):
+    def _initialize_simulation(self):
 
         """
         Initialize the connections between the blocks and do 
         some preprocessing to improve the convergence of the simulation.
         """
 
-        # Initialize the input connections for each block
+        #initialize the input connections for each block
         for connection in self.connections:
             connection.target.connect(connection.target_input, connection.source)
 
-        # sort the blocks based on their dependencies
+        #sort the blocks based on their dependencies
         self.blocks = self._sort_blocks()
+
+        #save the initial state
+        self.initial_state = self.get_state()
 
 
     def add_block(self, block):
-
         """
         add block to existing simulation
         """
-
         self.blocks.append(block)
         self.blocks = self._sort_blocks()
         
 
     def add_connection(self, connection):
-
         """
         add connection to existing simulation
         """
-
         connection.target.connect(connection.target_input, connection.source)
         self.connections.append(connection)
         self.blocks = self._sort_blocks()
@@ -136,7 +154,7 @@ class Simulation:
 
         steady_state = False
 
-        for it in range(max_iterations):
+        for iteration in range(max_iterations):
 
             prev_state = self.get_state()
 
@@ -147,7 +165,7 @@ class Simulation:
                                 for blk in self.blocks if blk.output != 0.0)
 
             if debug:
-                print("        iteration  :", it+1)
+                print("        iteration  :", iteration+1)
                 print("        difference :", max_rel_diff)
 
             if max_rel_diff < tolerance:
@@ -156,14 +174,14 @@ class Simulation:
 
         #update the outputs of the Integrators
         for block in self.blocks:
-            if isinstance(block, Integrator):
+            if isinstance(block, (Integrator, Differentiator)):
                 block.update_output()
 
         if not steady_state:
-            print("Warning: Steady state not reached")
+            logger.warning(f"Steady state not reached withing {iteration+1} iterations")
 
 
-    def run(self, duration=10, reset=False, max_iterations=100, tolerance=1e-6, debug=False):
+    def run(self, duration=10, max_iterations=100, tolerance=1e-6, debug=False):
 
         """
         performs multiple simulation steps and returns 
@@ -171,22 +189,20 @@ class Simulation:
 
         INPUTS:
             total_time     : (float) simulation time [s]
-            reset          : (bool) reset the simulation time
             max_iterations : (int) maximum numbver of fixed-point iterations
             tolerance      : (float) tolerance for convergence of fixed-point iterations
             debug          : (bool) print debugging info (convergence etc.)
         """
 
-        #reset time
-        if reset:
-            self.time = 0
+        #set local time
+        start_time = self.time
 
         #initialize the time series data
         data = [[] for _ in range(len(self.blocks))]
         time = []
 
         #iterate until duration is reached
-        while self.time < duration:
+        while self.time - start_time < duration:
 
             #perform one iteration
             self.update(max_iterations, tolerance, debug)
@@ -197,6 +213,15 @@ class Simulation:
                 data[i].append(val)
 
         return time, data
+
+
+    def reset(self):
+        """
+        reset the simulation to the initial state 
+        and reset the simulation time
+        """
+        self.time = 0
+        self.set_state(self.initial_state)
 
 
     def get_state(self):
@@ -215,3 +240,12 @@ class Simulation:
         for block, val in zip(self.blocks, state.values()):
             block.output = val
 
+    def get_outputs(self):
+        """
+        collect outputs of scopes into a dict
+        """
+        outputs = {}
+        for block in self.blocks:
+            if isinstance(block, Scope):
+                outputs[block.label] = block.output
+        return outputs
