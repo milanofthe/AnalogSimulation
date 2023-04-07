@@ -4,7 +4,7 @@
 ##
 ##    SYNTAX:
 ##        BLOCK <id> <type> <args>
-##        CONNECTION <to_id> <to_input> <from_id>
+##        CONNECTION <from_id> <to_id> <to_input>
 ##        STATE <id> <value> (optional)
 ##        TIME <dt> <time>
 ##
@@ -18,18 +18,17 @@ BLOCK 4 Adder            # Adder to combine spring and damping forces (F_total)
 BLOCK 5 Scope position   # Scope for display of position
 BLOCK 6 Scope velocity   # Scope for display of velocity
 
-CONNECTION 0 input 1     # Connect velocity (v) to the input of Integrator 0 (position)
-CONNECTION 1 input 4     # Connect total force (F_total) to the input of Integrator 1 (velocity)
-CONNECTION 2 input 0     # Connect position (x) to the input of spring force Amplifier (F_spring)
-CONNECTION 3 input 1     # Connect velocity (v) to the input of damping force Amplifier (F_damping)
-CONNECTION 4 input_0 2   # Connect spring force (F_spring) to the input_0 of Adder (F_total)
-CONNECTION 4 input_1 3   # Connect damping force (F_damping) to the input_1 of Adder (F_total)
-CONNECTION 5 input 0     # Connect position (x) to the output of Integrator 0 
-CONNECTION 6 input 1     # Connect velocity (v) to the output of Integrator 1 
-
+CONNECTION 1 0 input     # Connect velocity (v) to the input of Integrator 0 (position)
+CONNECTION 4 1 input     # Connect total force (F_total) to the input of Integrator 1 (velocity)
+CONNECTION 0 2 input     # Connect position (x) to the input of spring force Amplifier (F_spring)
+CONNECTION 1 3 input     # Connect velocity (v) to the input of damping force Amplifier (F_damping)
+CONNECTION 2 4 input_0   # Connect spring force (F_spring) to the input_0 of Adder (F_total)
+CONNECTION 3 4 input_1   # Connect damping force (F_damping) to the input_1 of Adder (F_total)
+CONNECTION 0 5 input     # Connect position (x) to the output of Integrator 0 
+CONNECTION 1 6 input     # Connect velocity (v) to the output of Integrator 1 
 
 STATE 0 1.0              # Initial position (x) = 1
-STATE 1 2.0              # Initial velocity (v) = 2
+STATE 1 0.0              # Initial velocity (v) = 2
 STATE 2 0.0              # Initial spring force (F_spring) = 0
 STATE 3 0.0              # Initial damping force (F_damping) = 0
 STATE 4 0.0              # Initial total force (F_total) = 0

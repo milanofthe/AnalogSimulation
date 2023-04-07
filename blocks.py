@@ -1,6 +1,9 @@
+
+
+
 #############################################################################
 ##
-##                            FUNCTIONAL BLOCKS
+##                      FUNCTIONAL BLOCKS (blocks.py)
 ##
 ##                            Milan Rother 2023
 ##
@@ -21,9 +24,13 @@ class Block:
     """
 
     def __init__(self):
+
+        #general properties for simulation
         self.inputs = {}
         self.output = 0
-        self.label = type(self).__name__.lower()
+        
+        #display propertiers
+        self.label  = type(self).__name__.lower()
 
     def connect(self, input_name, other_block):
         self.inputs[input_name] = other_block
@@ -33,6 +40,9 @@ class Block:
 
     def compute(self, t, dt):
         raise NotImplementedError()
+
+    def update_output(self):
+        pass
 
 
 class Amplifier(Block):
@@ -83,6 +93,7 @@ class Integrator(Block):
         self.prev_input = self.inputs['input'].output
         self.output = self.temp_output
 
+
 class Differentiator(Block):
 
     """
@@ -107,12 +118,12 @@ class Differentiator(Block):
         self.output = self.temp_output
 
 
-
 class Comparator(Block):
 
     """
     compares the input value to a threshold 
     and returns 0 if smaller and 1 if larger
+    (essentially heaviside function)
     """
 
     def __init__(self, threshold=0.0):
@@ -229,23 +240,6 @@ class Function(Block):
         self.output = self.func(input_signal)
 
 
-class Switch(Block):
-
-    """
-    switching block with an input signal 
-    and a control signals as inputs, pass
-    through if control signal positive
-    """
-    
-    def __str__(self):
-        return f"Switch"
-
-    def compute(self, t, dt):
-        input_signal   = self.inputs['input'].output
-        control_signal = self.inputs['control'].output
-        self.output = input_signal if control_signal > 0 else 0
-
-
 class Scope(Block):
     
     """
@@ -261,3 +255,41 @@ class Scope(Block):
     
     def compute(self, t, dt):
         self.output = self.inputs['input'].output
+
+
+class ODE(Block):
+
+    """
+    implements first order ordinary differential equation, 
+    solved with the trapezoidal rule (euler rule for the first timestep)
+    
+        d/dt x = f(x, y)
+             u = g(x, y)
+
+    the functions f and g are defined by expressions where x is the state variable and y is the input variable
+    """
+
+    def __init__(self, initial_value=0, expression_f="x+y", expression_g="x+y"):
+        super().__init__()
+        self.state = initial_value
+        self.prev_state = None
+        self.prev_input = None
+        self.expression_f = expression_f
+        self.expression_g = expression_g
+        self.func_f = lambda x, y : eval(expression_f)
+        self.func_g = lambda x, y : eval(expression_g)
+
+    def __str__(self):
+        return f"ODE {self.state} {self.expression_f} {self.expression_g}"
+
+    def compute(self, t, dt):
+        input_signal = self.inputs['input'].output
+        if self.prev_state is None or self.prev_input is None :
+            self.temp_state = self.state + dt * self.func_f(self.state, input_signal)
+        else:
+            self.temp_state = self.state + dt/2 * (self.func_f(self.state, input_signal) + self.func_f(self.prev_state, self.prev_input))
+
+    def update_output(self):
+        self.prev_input, input_signal = sinput_signal, self.inputs['input'].output
+        self.prev_state, self.state   = self.state   , self.temp_state
+        self.output = self.func_g(self.state, input_signal)

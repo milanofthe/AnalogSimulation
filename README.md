@@ -18,7 +18,6 @@ The simulator uses a fixed-point iteration method to compute the output values o
 ```python
 import matplotlib.pyplot as plt
 plt.style.use('dark_background')
-cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 from parsers import load_simulation_from_file
 ```
@@ -28,19 +27,19 @@ To create a new simulation, you need to define the components (blocks) and their
 
 Alternatively the blocks, connections and initial states together with the timestep can be defined witin an external file with the following syntax:
 
-    BLOCK <id> <type> <args>
-    CONNECTION <to_id> <to_input> <from_id>
-    STATE <id> <value> (optional)
-    TIME <dt> <time>
+    BLOCK      <id>      <type>  <args>
+    CONNECTION <from_id> <to_id> <to_input>
+    STATE      <id>      <value> (optional)
+    TIME       <dt>      <time>
     
 And then loaded using the `load_simulation_from_file` function from the parsers module.
 
 
 ```python
 #sim = load_simulation_from_file("example_simulations/oscillator.txt")
-#sim = load_simulation_from_file("example_simulations/driven_nonlinear_oscillator.txt")
+sim = load_simulation_from_file("example_simulations/driven_nonlinear_oscillator.txt")
 #sim = load_simulation_from_file("example_simulations/two_mass_oscillator.txt")
-sim = load_simulation_from_file("example_simulations/nonlinear_pendulum.txt")
+#sim = load_simulation_from_file("example_simulations/nonlinear_pendulum.txt")
 ```
 
 ## Simulation
@@ -52,13 +51,8 @@ To run the simulation for a specific duration, call the `run()` method on the Si
 time, data = sim.run(duration=60)
 ```
 
-    Function 'run' executed in 166.09ms
+    Function 'run' executed in 274.87ms
     
-
-
-```python
-sim.reset()
-```
 
 
 ```python
@@ -66,7 +60,7 @@ sim.reset()
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,5), dpi=160, tight_layout=True)
 
 for d, block in zip(data, sim.blocks):
-    if type(block).__name__ == "Scope":
+    if type(block).__name__ in ["Scope", "Generator"]:
         ax.plot(time, d, label=block.label)
     
 ax.grid(True)
@@ -78,5 +72,28 @@ plt.savefig("plot.png")
 ```
 
 
-![plot](https://user-images.githubusercontent.com/105657697/230586883-58dc1257-55b5-4ec1-9075-7082a5b6d23f.png)
+    
+![png](README_files/README_7_0.png)
+    
 
+
+
+```python
+sim.reset()
+```
+
+
+```python
+!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
+```
+
+    [NbConvertApp] Converting notebook README.ipynb to markdown
+    [NbConvertApp] Support files will be in README_files\
+    [NbConvertApp] Making directory README_files
+    [NbConvertApp] Writing 2975 bytes to README.md
+    
+
+
+```python
+
+```

@@ -9,7 +9,7 @@
 # IMPORTS ===================================================================
 
 from blocks import *
-from simulator import *
+from simulation import *
 
 
 # FUNCS ====================================================================
@@ -43,7 +43,6 @@ def load_simulation_from_file(filename):
         "Generator"      : Generator,
         "Function"       : Function,
         "Scope"          : Scope,
-        "Switch"         : Switch,
         "Differentiator" : Differentiator
     }
 
@@ -66,7 +65,7 @@ def load_simulation_from_file(filename):
             blocks.append(block)
 
         elif prefix == "CONNECTION":
-            _, target_block_id, target_input_name, source_block_id = parts
+            _, source_block_id, target_block_id, target_input_name = parts
             connection = Connection(blocks[int(target_block_id)], 
                                     target_input_name, 
                                     blocks[int(source_block_id)])
