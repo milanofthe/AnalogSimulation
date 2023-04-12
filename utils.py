@@ -32,16 +32,14 @@ def timer(func):
     return wrap_func
 
 
-def point_inside_polygon(x, y, polygon):
-
+def point_inside_polygon(position, polygon):
     """
     ray casting algorithm to check 
     if point is in polygon
     """
-
+    x, y = position
     n = len(polygon)
     inside = False
-
     p1x, p1y = polygon[0]
     for i in range(n + 1):
         p2x, p2y = polygon[i % n]
@@ -55,3 +53,12 @@ def point_inside_polygon(x, y, polygon):
         p1x, p1y = p2x, p2y
 
     return inside
+
+
+def boundingbox_from_shape(polygon):
+    """
+    compute the rectangular bounding box 
+    of the polygon shape
+    """
+    pts_x, pts_y = zip(*polygon)
+    return max(pts_x), min(pts_x), max(pts_y), min(pts_y)
