@@ -1,6 +1,6 @@
 #############################################################################
 ##
-##                     SIMULATION ENGINE (simulator.py)
+##                     SIMULATION ENGINE (simulation.py)
 ##
 ##                            Milan Rother 2023
 ##
@@ -9,8 +9,6 @@
 # IMPORTS ===================================================================
 
 from utils import timer
-from blocks import Integrator, Differentiator, Scope
-
 
 # CLASSES ===================================================================
 
@@ -35,7 +33,7 @@ class Simulation:
     and connections and the timestep update
     """
 
-    def __init__(self, blocks, connections, dt, time=0):
+    def __init__(self, blocks=[], connections=[], parameters=[], equations=[], dt=0.01, time=0):
 
         """
         initialize the simulation
@@ -49,10 +47,13 @@ class Simulation:
 
         self.blocks      = blocks
         self.connections = connections
+        self.parameters  = parameters
+        self.equations   = equations
         self.dt          = dt
         self.time        = time
 
-        self._initialize_simulation()
+        if len(blocks) > 0: 
+            self._initialize_simulation()
 
 
     def _initialize_simulation(self):
@@ -62,9 +63,16 @@ class Simulation:
         some preprocessing to improve the convergence of the simulation.
         """
 
+        #update parameters from equations
+        for equation in self.equations:
+            equation.compute(self.parameters)
+
         #initialize the input connections for each block
         for connection in self.connections:
             connection.target.connect(connection.target_input, connection.source)
+
+        for block in self.blocks:
+            block.check_parameter()
 
         #sort the blocks based on their dependencies
         self.blocks = self._sort_blocks()
@@ -79,6 +87,7 @@ class Simulation:
         """
         self.blocks.append(block)
         self.blocks = self._sort_blocks()
+        self.initial_state = self.get_state()
         
 
     def add_connection(self, connection):
@@ -222,6 +231,13 @@ class Simulation:
         self.set_state(self.initial_state)
 
 
+    def get_block(self, id=0):
+        """
+        retrieve specific block by identifier
+        """
+        return next((block for block in self.blocks if block.id==id))
+
+
     def get_state(self):
         """
         returns the current state of the simulation 
@@ -235,8 +251,10 @@ class Simulation:
         set the state of the simulation 
         (output values of all blocks)
         """
-        for block, val in zip(self.blocks, state.values()):
-            block.output = val
+        for block in self.blocks:
+            if block in state:
+                block.output = state[block]
+
 
     def get_outputs(self):
         """

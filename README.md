@@ -27,19 +27,21 @@ To create a new simulation, you need to define the components (blocks) and their
 
 Alternatively the blocks, connections and initial states together with the timestep can be defined witin an external file with the following syntax:
 
-    BLOCK      <id>      <type>  <args>
-    CONNECTION <from_id> <to_id> <to_input>
-    STATE      <id>      <value> (optional)
-    TIME       <dt>      <time>
+    BLOCK      <id>         <type>  <args>
+    CONNECTION <from_id>    <to_id> <to_input>
+    PARAMETER  <parameter>  <value>
+    EQUATION   <expression>
+    TIME       <dt>         <time>
     
 And then loaded using the `load_simulation_from_file` function from the parsers module.
 
 
 ```python
 #sim = load_simulation_from_file("example_simulations/oscillator.txt")
-sim = load_simulation_from_file("example_simulations/driven_nonlinear_oscillator.txt")
+#sim = load_simulation_from_file("example_simulations/driven_nonlinear_oscillator.txt")
+#sim = load_simulation_from_file("example_simulations/single_track_model.txt")
 #sim = load_simulation_from_file("example_simulations/two_mass_oscillator.txt")
-#sim = load_simulation_from_file("example_simulations/nonlinear_pendulum.txt")
+sim = load_simulation_from_file("example_simulations/nonlinear_pendulum.txt")
 ```
 
 ## Simulation
@@ -48,10 +50,10 @@ To run the simulation for a specific duration, call the `run()` method on the Si
 
 
 ```python
-time, data = sim.run(duration=60)
+time, data = sim.run(duration=60, debug=False)
 ```
 
-    Function 'run' executed in 274.87ms
+    Function 'run' executed in 174.17ms
     
 
 
@@ -71,6 +73,29 @@ ax.legend(loc="best", ncol=2)
 plt.savefig("plot.png")
 ```
 
-![plot](https://user-images.githubusercontent.com/105657697/230660670-e00d057f-8c86-4579-becb-7372916195a7.png)
+
+    
+![png](README_files/README_7_0.png)
+    
 
 
+
+```python
+sim.reset()
+```
+
+
+```python
+!jupyter nbconvert --ClearMetadataPreprocessor.enabled=True --ClearOutput.enabled=True --to markdown README.ipynb
+```
+
+    [NbConvertApp] Converting notebook README.ipynb to markdown
+    [NbConvertApp] Support files will be in README_files\
+    [NbConvertApp] Making directory README_files
+    [NbConvertApp] Writing 3164 bytes to README.md
+    
+
+
+```python
+
+```

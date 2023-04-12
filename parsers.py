@@ -14,23 +14,16 @@ from simulation import *
 
 # FUNCS ====================================================================
 
-def load_simulation_from_file(filename):
+def parse_simulation_file(filename):
 
     """
     load simulation blocks, connections and state 
-    from .txt file and returns simulation object
+    from .txt file and returns blocks, connections 
+    and time if available
 
     INPUTS:
         filename : path to file
     """
-
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-
-    blocks = []
-    connections = []
-    state_values = {}
-    dt, time = None, None
 
     block_types = {
         "Amplifier"      : Amplifier,
@@ -43,75 +36,134 @@ def load_simulation_from_file(filename):
         "Generator"      : Generator,
         "Function"       : Function,
         "Scope"          : Scope,
-        "Differentiator" : Differentiator
+        "Differentiator" : Differentiator,
+        "Subsystem"      : Subsystem
     }
 
-    for line in lines:
-        line = line.strip()
 
-        #skip empty lines and comments
-        if not line or line.startswith('#'):
+    #sort lines by prefixes
+
+    block_lines = []
+    connection_lines = []
+    state_lines = []
+    parameter_lines = []
+    equation_lines = []
+    
+    dt, time = None, None
+
+    with open(filename, 'r') as file:
+
+        for line in file:
+
+            #remove junk
+            line = line.strip()
+
+            #skip empty lines and comments
+            if not line or line.startswith('#'):
+                continue
+
+            #remove inline comment
+            line, *_ = line.split("#")
+
+            #extract info from line
+            prefix, *parts = line.split()
+
+            if prefix == "BLOCK":
+                block_lines.append(parts)
+
+            elif prefix == "CONNECTION":
+                connection_lines.append(parts)
+
+            elif prefix == "TIME":
+                dt, time = parts
+                dt, time = float(dt), float(time)
+
+            elif prefix == "PARAMETER":
+                parameter_lines.append(parts)
+
+            elif prefix == "EQUATION":
+                equation_lines.append(parts)
+
+            else:
+                raise ValueError(f"Unknown line prefix: {prefix}")
+
+    #handle parameters
+    parameters = {}
+    for line in parameter_lines:
+        if len(line)==1:
+            param, *_ = line
+            value = None
+        else:
+            param, value = line
+        parameters[param] = Parameter(param, value)
+
+    #handle equations
+    equations = []
+    for expr, *_ in equation_lines:
+        equations.append(Equation(expr))
+
+    #handle blocks
+    blocks = {}
+    for block_id, block_type, *block_args in block_lines:
+
+        #check if subsystem
+        if block_type == "Subsystem":
+            block = load_subsystem_from_file(*block_args)
             continue
 
-        #remove inline comment
-        line, *_ = line.split("#")
+        #check if parameter given
+        for i, arg in enumerate(block_args): 
+            if arg in parameters:
+                block_args[i] = parameters[arg]
 
-        parts = line.split()
-        prefix = parts[0]
+        #initialize block
+        block = block_types[block_type](*block_args)
+        block.id = block_id
 
-        if prefix == "BLOCK":
-            _, block_id, block_type, *block_args = parts
-            block = block_types[block_type](*block_args)
-            blocks.append(block)
+        blocks[block_id] = block
 
-        elif prefix == "CONNECTION":
-            _, source_block_id, target_block_id, target_input_name = parts
-            connection = Connection(blocks[int(target_block_id)], 
-                                    target_input_name, 
-                                    blocks[int(source_block_id)])
-            connections.append(connection)
+    #handle connections
+    connections = []
+    for source_block_id, target_block_id, target_input_name in connection_lines:
+        connections.append(Connection(blocks[target_block_id], 
+                                      target_input_name, 
+                                      blocks[source_block_id]))
 
-        elif prefix == "STATE":
-            _, block_id, state_value = parts
-            state_values[int(block_id)] = float(state_value)
+    #rearrange into list
+    blocks = list(blocks.values())
+    parameters = list(parameters.values())
 
-        elif prefix == "TIME":
-            _, dt, time = parts
+    return blocks, connections, parameters, equations, dt, time
+        
 
-        else:
-            raise ValueError(f"Unknown line prefix: {prefix}")
-
-    if dt is None or time is None:
-        raise ValueError("Simulation time or timestep not found in file")
-
-    for block_id, state_value in state_values.items():
-        blocks[block_id].output = state_value
-
-    return Simulation(blocks, connections, float(dt), float(time))
-
-
-def save_simulation_to_file(simulation, filename):
+def load_subsystem_from_file(filename):
 
     """
-    saves simulation blocks, connections and state 
-    to .txt file in custom format.
-    
+    load simulation blocks, connections and state 
+    from .txt file and returns subsystem object
+
     INPUTS:
-        simulation : Simulation object
-        filename   : path to file
+        filename : path to file
     """
     
-    with open(filename, 'w') as f:
+    blocks, connections, *_ = parse_simulation_file(filename)
 
-        for i, block in enumerate(simulation.blocks):
-            f.write(f"BLOCK {i} {repr(block)}\n")
+    return Subsystem(blocks, connections, filename)
 
-        for connection in simulation.connections:
-            target_block_id = simulation.blocks.index(connection.target)
-            source_block_id = simulation.blocks.index(connection.source)
-            f.write(f"CONNECTION {target_block_id} {connection.target_input} {source_block_id}\n")
 
-        for i, block in enumerate(simulation.blocks):
-            f.write(f"STATE {i} {repr(block.output)}\n")
+def load_simulation_from_file(filename):
 
-        f.write(f"TIME {repr(simulation.dt)} {repr(simulation.time)}\n")
+    """
+    load simulation blocks, connections and state 
+    from .txt file and returns simulation object
+
+    INPUTS:
+        filename : path to file
+    """
+
+    blocks, connections, parameters, equations, dt, time = parse_simulation_file(filename)
+
+    if time is None or dt is None:
+        return Simulation(blocks, connections, parameters, equations)
+    else:
+        return Simulation(blocks, connections, parameters, equations, dt, time)

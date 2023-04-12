@@ -1,6 +1,3 @@
-
-
-
 #############################################################################
 ##
 ##                      FUNCTIONAL BLOCKS (blocks.py)
@@ -11,10 +8,31 @@
 
 # IMPORTS ===================================================================
 
-from math import *
+from math import * #needed for the evaluation of the expressions
 
 
 # CLASSES ===================================================================
+
+class Parameter:
+
+    def __init__(self, parameter="x", value=1):
+        self.parameter = parameter
+        self.value = float(value) if value is not None else None
+
+
+class Equation:
+
+    def __init__(self, expression="z=3*x+y"):
+        self.expression = expression
+        self.left, self.right = expression.split("=")
+        self.func = lambda **kwargs : eval(self.right, kwargs)
+
+    def compute(self, parameters=[]):
+        kwargs = {p.parameter : p.value for p in parameters if p.parameter in self.right}
+        for p in parameters:
+            if p.parameter == self.left:
+                p.value = self.func(**kwargs)
+
 
 class Block:
 
@@ -28,20 +46,26 @@ class Block:
         #general properties for simulation
         self.inputs = {}
         self.output = 0
+
+        #identifier for reference
+        self.id = None
         
         #display propertiers
-        self.label  = type(self).__name__.lower()
+        self.label = type(self).__name__.lower()
+
+    def __str__(self):
+        raise NotImplementedError()    
 
     def connect(self, input_name, other_block):
         self.inputs[input_name] = other_block
-
-    def __str__(self):
-        raise NotImplementedError()
 
     def compute(self, t, dt):
         raise NotImplementedError()
 
     def update_output(self):
+        pass
+
+    def check_parameter(self):
         pass
 
 
@@ -54,12 +78,23 @@ class Amplifier(Block):
 
     def __init__(self, gain=1.0):
         super().__init__()
-        self.gain = float(gain)
+        self.gain = gain
 
     def __str__(self):
         return f"Amplifier {self.gain}"
 
+    def check_parameter(self):
+        #handle parameter for gain
+        if isinstance(self.gain, Parameter):
+            self.gain = self.gain.value
+        else:
+            self.gain = float(self.gain)
+
     def compute(self, t, dt):
+        
+        if len(self.inputs) == 0:
+            raise ValueError(f"No input defined for block {self.label}_{self.id}")
+
         input_signal = self.inputs['input'].output
         self.output = self.gain * input_signal
         return self.output 
@@ -75,14 +110,30 @@ class Integrator(Block):
 
     def __init__(self, initial_value=0.0):
         super().__init__()
-        self.output = float(initial_value)
-        self.temp_output = float(initial_value)
+        self.output = initial_value
+        self.temp_output = initial_value
         self.prev_input = None
 
     def __str__(self):
         return f"Integrator {self.output}"
 
+    def check_parameter(self):
+
+        #handle parameter for initial condition
+        if isinstance(self.output, Parameter):
+            self.output = self.output.value
+            self.temp_output = self.temp_output.value
+        else:
+            self.output = float(self.output)
+            self.temp_output = float(self.temp_output)
+
+
     def compute(self, t, dt):
+
+        #handle missing input
+        if len(self.inputs) == 0:
+            raise ValueError(f"No input defined for block {self.label}_{self.id}")
+
         input_signal = self.inputs['input'].output
         if self.prev_input is None:
             self.temp_output = self.output + input_signal * dt
@@ -109,6 +160,10 @@ class Differentiator(Block):
         return "Differentiator"
 
     def compute(self, t, dt):
+
+        if len(self.inputs) == 0:
+            raise ValueError(f"No input defined for block {self.label}_{self.id}")
+
         input_signal = self.inputs['input'].output
         if self.prev_input is not None:
             self.temp_output = (input_signal - self.prev_input) / dt
@@ -128,12 +183,25 @@ class Comparator(Block):
 
     def __init__(self, threshold=0.0):
         super().__init__()
-        self.threshold = float(threshold)
+        self.threshold = threshold
 
     def __str__(self):
         return f"Comparator {self.threshold}"
 
+    def check_parameter(self):
+
+        #handle parameter for threshold
+        if isinstance(self.threshold, Parameter):
+            self.threshold = self.threshold.value
+        else:
+            self.threshold = float(self.threshold)
+
     def compute(self, t, dt):
+
+        #handle missing input
+        if len(self.inputs) == 0:
+            raise ValueError(f"No input defined for block {self.label}_{self.id}")
+
         input_signal = self.inputs['input'].output
         self.output = 1 if input_signal >= self.threshold else 0
 
@@ -148,6 +216,10 @@ class Adder(Block):
         return "Adder"
 
     def compute(self, t, dt):
+
+        if len(self.inputs) == 0:
+            raise ValueError(f"No input defined for block {self.label}_{self.id}")
+
         self.output = 0
         for input_block in self.inputs.values():
             self.output += input_block.output
@@ -163,6 +235,10 @@ class Multiplier(Block):
         return "Multiplier"
 
     def compute(self, t, dt):
+
+        if len(self.inputs) == 0:
+            raise ValueError(f"No input defined for block {self.label}_{self.id}")
+
         self.output = 1
         for input_block in self.inputs.values():
             self.output *= input_block.output
@@ -175,12 +251,19 @@ class Constant(Block):
     (same as Generator with fx="1")
     """
 
-    def __init__(self, value):
+    def __init__(self, value=1):
         super().__init__()
-        self.output = float(value)
+        self.output = value
 
     def __str__(self):
         return f"Constant {self.output}"
+
+    def check_parameter(self):
+        #handle parameter for output
+        if isinstance(self.output, Parameter):
+            self.output = self.output.value
+        else:
+            self.output = float(self.output)
 
     def compute(self, t, dt):
         pass
@@ -197,6 +280,10 @@ class Inverter(Block):
         return "Inverter"
 
     def compute(self, t, dt):
+
+        if len(self.inputs) == 0:
+            raise ValueError(f"No input defined for block {self.label}_{self.id}")
+
         self.output = -1 * self.inputs['input'].output
 
 
@@ -236,6 +323,10 @@ class Function(Block):
         return f"Function {self.expression}"
 
     def compute(self, t, dt):
+
+        if len(self.inputs) == 0:
+            raise ValueError(f"No input defined for block {self.label}_{self.id}")
+
         input_signal = self.inputs['input'].output
         self.output = self.func(input_signal)
 
@@ -246,7 +337,7 @@ class Scope(Block):
     block for visualization, input pass through
     """
 
-    def __init__(self, label=""):
+    def __init__(self, label="output"):
         super().__init__()
         self.label = label
 
@@ -254,42 +345,40 @@ class Scope(Block):
         return f"Scope {self.label}"
     
     def compute(self, t, dt):
+
+        if len(self.inputs) == 0:
+            raise ValueError(f"No input defined for block {self.label}_{self.id}")
+
         self.output = self.inputs['input'].output
 
 
-class ODE(Block):
+class Subsystem(Block):
 
     """
-    implements first order ordinary differential equation, 
-    solved with the trapezoidal rule (euler rule for the first timestep)
-    
-        d/dt x = f(x, y)
-             u = g(x, y)
-
-    the functions f and g are defined by expressions where x is the state variable and y is the input variable
+    this class implements a subsystem made of multiple 
+    blocks and connections, where the first block is the 
+    input block and the last block is the output block
     """
 
-    def __init__(self, initial_value=0, expression_f="x+y", expression_g="x+y"):
+    def __init__(self, blocks=[], connections=[], label="Subsystem"):
         super().__init__()
-        self.state = initial_value
-        self.prev_state = None
-        self.prev_input = None
-        self.expression_f = expression_f
-        self.expression_g = expression_g
-        self.func_f = lambda x, y : eval(expression_f)
-        self.func_g = lambda x, y : eval(expression_g)
+        self.blocks = blocks
+        self.connections = connections
 
     def __str__(self):
-        return f"ODE {self.state} {self.expression_f} {self.expression_g}"
+        return f"Subsystem {self.label}"
+        
+    def connect(self, input_name, other_block):
+        self.blocks[0].connect(input_name, other_block)
+        for connection in self.connections:
+            connection.target.connect(connection.target_input, connection.source)
 
     def compute(self, t, dt):
-        input_signal = self.inputs['input'].output
-        if self.prev_state is None or self.prev_input is None :
-            self.temp_state = self.state + dt * self.func_f(self.state, input_signal)
-        else:
-            self.temp_state = self.state + dt/2 * (self.func_f(self.state, input_signal) + self.func_f(self.prev_state, self.prev_input))
+        for block in self.blocks:
+            block.compute(t, dt)
 
     def update_output(self):
-        self.prev_input, input_signal = sinput_signal, self.inputs['input'].output
-        self.prev_state, self.state   = self.state   , self.temp_state
-        self.output = self.func_g(self.state, input_signal)
+        for block in self.blocks:
+            block.update_output()
+        self.output = self.blocks[-1].output
+
