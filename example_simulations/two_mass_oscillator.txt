@@ -5,13 +5,18 @@
 ##    SYNTAX:
 ##        BLOCK <id> <type> <args>
 ##        CONNECTION <from_id> <to_id> <to_input>
-##        STATE <id> <value> (optional)
+##        PARAMETER <parameter> <value>
+##        EQUATION <expression>
 ##        TIME <dt> <time>
 ##
 ###########################################################################
 
-BLOCK 0 Integrator 0.0         # Integrator 0 for position x1 (mass 1)
-BLOCK 1 Integrator 0.0         # Integrator 1 for position x2 (mass 2)
+
+PARAMETER x1_0 1               # Parameter for initial position of mass 1 x1(0)
+PARAMETER x2_0 2               # Parameter for initial position of mass 2 x2(0)
+
+BLOCK 0 Integrator x1_0        # Integrator 0 for position x1 (mass 1)
+BLOCK 1 Integrator x2_0        # Integrator 1 for position x2 (mass 2)
 BLOCK 2 Integrator 0.0         # Integrator 2 for velocity v1 (mass 1)
 BLOCK 3 Integrator 0.0         # Integrator 3 for velocity v2 (mass 2)
 BLOCK 4 Amplifier -1.0         # Amplifier with gain -k1/m1 for spring force F1 (mass 1)
@@ -46,18 +51,6 @@ CONNECTION 0 11 input          # Connect position x1 to the output of Integrator
 CONNECTION 2 12 input          # Connect velocity v1 to the output of Integrator 2 
 CONNECTION 1 13 input          # Connect position x2 to the output of Integrator 1 
 CONNECTION 3 14 input          # Connect velocity v2 to the output of Integrator 3 
-
-STATE 0 1.0                    # Initial position x1 = 1
-STATE 1 -1.0                   # Initial position x2 = 0
-STATE 2 0.0                    # Initial velocity v1 = 0
-STATE 3 0.0                    # Initial velocity v2 = 0
-STATE 4 0.0                    # Initial spring force F1 = 0
-STATE 5 0.0                    # Initial spring force F2 = 0
-STATE 6 0.0                    # Initial damping force D1 = 0
-STATE 7 0.0                    # Initial damping force D2 = 0
-STATE 8 0.0                    # Initial total force F_total1 = 0
-STATE 9 0.0                    # Initial total force F_total2 = 0
-STATE 10 0.0                   # Initial spring force interaction F_interaction = 0
 
 TIME 0.01 0                    # Set time step (dt) and initial time
 

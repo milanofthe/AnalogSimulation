@@ -1,0 +1,39 @@
+#########################################################
+##
+##    PID-CONTROLLER (import as subsystem)
+##
+##    SYNTAX:
+##        BLOCK <id> <type> <args>
+##        CONNECTION <from_id> <to_id> <to_input>
+##        PARAMETER <parameter> <value>
+##        EQUATION <expression>
+##        TIME <dt> <time>
+##
+#########################################################
+
+
+PARAMETER Kp 1
+PARAMETER Ki 1
+PARAMETER Kd 1
+
+BLOCK 0 Amplifier 1      # input block 
+BLOCK 1 Amplifier Ki     # integrator constant
+BLOCK 2 Integrator 0.0
+BLOCK 3 Amplifier Kd     # differentiator constant
+BLOCK 4 Differentiator
+BLOCK 5 Amplifier Kp     # proportional constant
+BLOCK 6 Adder            # output block
+
+# integrator path
+CONNECTION 0 1 input
+CONNECTION 1 2 input
+CONNECTION 2 6 input1
+
+# differentiator path
+CONNECTION 0 3 input
+CONNECTION 3 4 input
+CONNECTION 4 6 input2
+
+# proportional path
+CONNECTION 0 5 input
+CONNECTION 5 6 input3

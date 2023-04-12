@@ -1,0 +1,85 @@
+###########################################################################
+##
+##    SINGLE-TRACK-MODEL
+##
+##    SYNTAX:
+##        BLOCK <id> <type> <args>
+##        CONNECTION <from_id> <to_id> <to_input>
+##        PARAMETER <parameter> <value>
+##        EQUATION <expression>
+##        TIME <dt> <time>
+##
+###########################################################################
+
+
+# parameters --------------------------------------------------------------
+PARAMETER c_v 75000         # c_v Schräglaufsteifigkeit Vorderachse
+PARAMETER c_n 150000        # c_n Schräglaufsteifigkeit Hinterachse
+PARAMETER l_v 1.334         # l_v Abstand Schwerpunkt – Vorderachse
+PARAMETER l_n 1.456         # l_n Abstand Schwerpunkt – Hinterachse
+PARAMETER m 1550            # m Masse
+PARAMETER v 20              # v Geschwindigkeit
+PARAMETER theta 2800        # theta Gierträgheitsmoment
+
+
+# internal statespace parameters ------------------------------------------
+PARAMETER a1
+PARAMETER a2
+PARAMETER a3
+
+PARAMETER b1
+PARAMETER b2
+PARAMETER b3
+
+EQUATION a1=-(c_v+c_n)/(m*v)
+EQUATION a2=(m*v**2-(c_n*l_n-c_v*l_v))/(m*v**2)
+EQUATION a3=-c_v/(m*v)
+
+EQUATION b1=-(c_n*l_n-c_v*l_v)/theta
+EQUATION b2=-(c_n*l_n**2+c_v*l_v**2)/(theta*v)
+EQUATION b3=c_v*l_v/theta
+
+
+# system ------------------------------------------------------------------
+BLOCK 0  Integrator 0.0         # Integrator for beta
+BLOCK 1  Integrator 0.0         # Integrator for d_psi
+BLOCK 2  Integrator 0.0         # Integrator for psi
+BLOCK 3  Amplifier  a1          # a1
+BLOCK 4  Amplifier  a2          # a2
+BLOCK 5  Amplifier  a3          # a3
+BLOCK 6  Amplifier  b1          # b1
+BLOCK 7  Amplifier  b2          # b2
+BLOCK 8  Amplifier  b3          # b3
+BLOCK 9  Adder                  # add as
+BLOCK 10 Adder                  # add bs
+BLOCK 11 Generator  sin(x)      # input signal delta_H / i_S
+BLOCK 12 Scope beta
+BLOCK 13 Scope d_psi
+BLOCK 14 Scope psi
+
+CONNECTION 0  3  input
+CONNECTION 0  4  input
+
+CONNECTION 1  6  input
+CONNECTION 1  7  input
+
+CONNECTION 11 5  input
+CONNECTION 11 8  input
+
+CONNECTION 3  9  input1
+CONNECTION 4  9  input2
+CONNECTION 5  9  input3
+
+CONNECTION 6  10 input1
+CONNECTION 7  10 input2
+CONNECTION 8  10 input3
+
+CONNECTION 9  0  input
+CONNECTION 10 1  input
+CONNECTION 1  2  input
+
+CONNECTION 0  12 input
+CONNECTION 1  13 input
+CONNECTION 2  14 input
+
+TIME 0.001 0                    # Set time step (dt) and initial time

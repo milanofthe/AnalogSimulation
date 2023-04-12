@@ -28,7 +28,7 @@ CONNECTION 0 5 input     # Connect position (x) to the output of Integrator 0
 CONNECTION 1 6 input     # Connect velocity (v) to the output of Integrator 1 
 
 STATE 0 1.0              # Initial position (x) = 1
-STATE 1 0.0              # Initial velocity (v) = 2
+STATE 1 3.0              # Initial velocity (v) = 2
 STATE 2 0.0              # Initial spring force (F_spring) = 0
 STATE 3 0.0              # Initial damping force (F_damping) = 0
 STATE 4 0.0              # Initial total force (F_total) = 0
