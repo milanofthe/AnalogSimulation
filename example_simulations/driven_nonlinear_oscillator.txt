@@ -11,17 +11,15 @@
 ##
 ###########################################################################
 
-PARAMETER x_0 2.0                            # Parameter for initial position x(0)
-PARAMETER v_0                                # Parameter for initial velocity v(0) (not defined)
-
-EQUATION v_0=-0.5*x_0                        # Equation that updates the initial velocity
+PARAMETER x_0 0.0                            # Parameter for initial position x(0)
+PARAMETER v_0 1.5                            # Parameter for initial velocity v(0) (not defined)
 
 BLOCK 0 Integrator x_0                       # Integrator 0 for position (x)
 BLOCK 1 Integrator v_0                       # Integrator 1 for velocity (v)
-BLOCK 2 Function -x**3                       # Function block for nonlinear spring force (F_spring)
-BLOCK 3 Amplifier -0.2                       # Amplifier with gain -c/m = -0.5/1 = -0.5 for damping force (F_damping)
+BLOCK 2 Function -0.1*x**3                   # Function block for nonlinear spring force (F_spring)
+BLOCK 3 Amplifier -0.6                       # Amplifier with gain -c/m = -0.5/1 = -0.5 for damping force (F_damping)
 BLOCK 4 Adder                                # Adder to combine spring, damping, and driving forces (F_total)
-BLOCK 5 Generator (1-exp(-0.1*x))*(2+sin(x)) # Generator for sinusoidal driving force (F_driving)
+BLOCK 5 Generator 1*(x>10)                   # Generator for sinusoidal driving force (F_driving)
 BLOCK 6 Scope position                       # Scope for display of position
 BLOCK 7 Scope velocity                       # Scope for display of velocity
 

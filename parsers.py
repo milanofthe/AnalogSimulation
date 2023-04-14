@@ -12,7 +12,7 @@ from blocks import *
 from simulation import *
 
 
-# FUNCS ====================================================================
+# FUNCS =====================================================================
 
 def parse_simulation_file(filename):
 
@@ -99,8 +99,8 @@ def parse_simulation_file(filename):
 
     #handle equations
     equations = []
-    for expr, *_ in equation_lines:
-        equations.append(Equation(expr))
+    for expr in equation_lines:
+        equations.append(Equation("".join(expr)))
 
     #handle blocks
     blocks = {}

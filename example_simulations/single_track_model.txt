@@ -18,7 +18,7 @@ PARAMETER c_n 150000        # c_n Schräglaufsteifigkeit Hinterachse
 PARAMETER l_v 1.334         # l_v Abstand Schwerpunkt – Vorderachse
 PARAMETER l_n 1.456         # l_n Abstand Schwerpunkt – Hinterachse
 PARAMETER m 1550            # m Masse
-PARAMETER v 20              # v Geschwindigkeit
+PARAMETER v 25              # v Geschwindigkeit
 PARAMETER theta 2800        # theta Gierträgheitsmoment
 
 
@@ -31,55 +31,54 @@ PARAMETER b1
 PARAMETER b2
 PARAMETER b3
 
-EQUATION a1=-(c_v+c_n)/(m*v)
-EQUATION a2=(m*v**2-(c_n*l_n-c_v*l_v))/(m*v**2)
-EQUATION a3=-c_v/(m*v)
+EQUATION a1 = -(c_v + c_n) / (m*v)
+EQUATION a2 = (m*v**2 - (c_n*l_n - c_v*l_v)) / (m*v**2)
+EQUATION a3 = -c_v / (m*v)
 
-EQUATION b1=-(c_n*l_n-c_v*l_v)/theta
-EQUATION b2=-(c_n*l_n**2+c_v*l_v**2)/(theta*v)
-EQUATION b3=c_v*l_v/theta
+EQUATION b1 = -(c_n*l_n - c_v*l_v) / theta
+EQUATION b2 = -(c_n*l_n**2 + c_v*l_v**2) / (theta*v)
+EQUATION b3 = c_v*l_v / theta
 
 
 # system ------------------------------------------------------------------
-BLOCK 0  Integrator 0.0         # Integrator for beta
-BLOCK 1  Integrator 0.0         # Integrator for d_psi
-BLOCK 2  Integrator 0.0         # Integrator for psi
-BLOCK 3  Amplifier  a1          # a1
-BLOCK 4  Amplifier  a2          # a2
-BLOCK 5  Amplifier  a3          # a3
-BLOCK 6  Amplifier  b1          # b1
-BLOCK 7  Amplifier  b2          # b2
-BLOCK 8  Amplifier  b3          # b3
-BLOCK 9  Adder                  # add as
-BLOCK 10 Adder                  # add bs
-BLOCK 11 Generator  sin(x)      # input signal delta_H / i_S
-BLOCK 12 Scope beta
-BLOCK 13 Scope d_psi
-BLOCK 14 Scope psi
+BLOCK i1   Integrator 0.0         # Integrator for beta
+BLOCK i2   Integrator 0.0         # Integrator for d_psi
+BLOCK i3   Integrator 0.0         # Integrator for psi
+BLOCK Aa1  Amplifier  a1          # a1
+BLOCK Aa2  Amplifier  a2          # a2
+BLOCK Aa3  Amplifier  a3          # a3
+BLOCK Ab1  Amplifier  b1          # b1
+BLOCK Ab2  Amplifier  b2          # b2
+BLOCK Ab3  Amplifier  b3          # b3
+BLOCK add1 Adder                  # add as
+BLOCK add2 Adder                  # add bs
+BLOCK src  Generator  1.0*(x>1)   # input signal delta_H / i_S
+BLOCK s1   Scope      beta
+BLOCK s2   Scope      d_psi
 
-CONNECTION 0  3  input
-CONNECTION 0  4  input
 
-CONNECTION 1  6  input
-CONNECTION 1  7  input
+CONNECTION i1  Aa1  input
+CONNECTION i1  Ab1  input
 
-CONNECTION 11 5  input
-CONNECTION 11 8  input
+CONNECTION i2  Aa2  input
+CONNECTION i2  Ab2  input
+CONNECTION i2  i3   input
 
-CONNECTION 3  9  input1
-CONNECTION 4  9  input2
-CONNECTION 5  9  input3
+CONNECTION src Aa3  input
+CONNECTION src Ab3  input
 
-CONNECTION 6  10 input1
-CONNECTION 7  10 input2
-CONNECTION 8  10 input3
+CONNECTION Aa1  add1  input1
+CONNECTION Aa2  add1  input2
+CONNECTION Aa3  add1  input3
 
-CONNECTION 9  0  input
-CONNECTION 10 1  input
-CONNECTION 1  2  input
+CONNECTION Ab1  add2  input1
+CONNECTION Ab2  add2  input2
+CONNECTION Ab3  add2  input3
 
-CONNECTION 0  12 input
-CONNECTION 1  13 input
-CONNECTION 2  14 input
+CONNECTION add1  i1  input
+CONNECTION add2  i2  input
 
-TIME 0.001 0                    # Set time step (dt) and initial time
+CONNECTION i1  s1 input
+CONNECTION i2  s2 input
+
+TIME 0.01 0                    # Set time step (dt) and initial time

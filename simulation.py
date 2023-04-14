@@ -71,6 +71,7 @@ class Simulation:
         for connection in self.connections:
             connection.target.connect(connection.target_input, connection.source)
 
+        #check blocks for parameters and update their values
         for block in self.blocks:
             block.check_parameter()
 
@@ -167,15 +168,16 @@ class Simulation:
                 block.compute(self.time, self.dt)
 
             #compute relative deviation
-            max_rel_diff = max(abs((blk.output - prev_state[blk])/blk.output) 
-                                for blk in self.blocks if blk.output != 0.0)
+            rel_errors = [abs((blk.output - prev_state[blk])/blk.output) 
+                          for blk in self.blocks if blk.output != 0.0]
+            max_rel_errors = max(rel_errors + [0])
 
             if debug:
                 print("        iteration  :", iteration+1)
-                print("        difference :", max_rel_diff)
+                print("        difference :", max_rel_errors)
 
             #check for convergence
-            if max_rel_diff < tolerance:
+            if max_rel_errors < tolerance:
                 steady_state = True
                 break
 
@@ -211,7 +213,7 @@ class Simulation:
         #iterate until duration is reached
         while self.time - start_time < duration:
 
-            #perform one iteration
+            #perform one timestep
             self.update(max_iterations, tolerance, debug)
             
             #save the current state

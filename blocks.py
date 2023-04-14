@@ -15,12 +15,21 @@ from math import * #needed for the evaluation of the expressions
 
 class Parameter:
 
+    """
+    Parameter object that can be referenced by the blocks
+    """
+
     def __init__(self, parameter="x", value=1):
         self.parameter = parameter
         self.value = float(value) if value is not None else None
 
 
 class Equation:
+
+    """
+    handle expressions / equations connecting 
+    and updating the parameters
+    """
 
     def __init__(self, expression="z=3*x+y"):
         self.expression = expression
@@ -298,7 +307,7 @@ class Generator(Block):
     def __init__(self, expression="sin(x)"):
         super().__init__()
         self.expression = expression
-        self.func = lambda x: eval(expression)
+        self.func = lambda x: eval(expression, {"x": x})
 
     def __str__(self):
         return f"Generator {self.expression}"
@@ -317,7 +326,7 @@ class Function(Block):
     def __init__(self, expression="x+1"):
         super().__init__()
         self.expression = expression
-        self.func = lambda x : eval(expression)
+        self.func = lambda x : eval(expression, {"x": x})
 
     def __str__(self):
         return f"Function {self.expression}"
@@ -364,11 +373,15 @@ class Subsystem(Block):
         super().__init__()
         self.blocks = blocks
         self.connections = connections
+        self.label = label
 
     def __str__(self):
         return f"Subsystem {self.label}"
         
     def connect(self, input_name, other_block):
+        """
+        connect global in put to first block
+        """
         self.blocks[0].connect(input_name, other_block)
         for connection in self.connections:
             connection.target.connect(connection.target_input, connection.source)
@@ -378,6 +391,10 @@ class Subsystem(Block):
             block.compute(t, dt)
 
     def update_output(self):
+        """
+        update outputs of all blocks and 
+        get global output from last block
+        """
         for block in self.blocks:
             block.update_output()
         self.output = self.blocks[-1].output
