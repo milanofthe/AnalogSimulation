@@ -1,6 +1,6 @@
 # AnalogSimulation
 
-This project is a small analog simulation framework that allows you to model and simulate various analog components and their connections. The simulator supports components such as amplifiers, integrators, comparators, adders, multipliers, constant sources, inverters and arbitrary signal generators.
+This project is a small node based simulation framework implemented in pure python. It allows modelling and simulation various analog components and their connections similar to Matlab Simulink. The simulator supports components such as amplifiers, integrators, comparators, adders, multipliers, constant sources, inverters and arbitrary signal generators.
 
 The simulator uses a fixed-point iteration method to compute the output values of the blocks, making it suitable for systems that include feedback loops and other complex interconnections.
 
